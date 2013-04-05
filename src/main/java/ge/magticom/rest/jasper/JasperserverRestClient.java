@@ -1,4 +1,4 @@
-package com.gkudos.jasperserver.client;
+package ge.magticom.rest.jasper;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -16,8 +16,6 @@ import org.dom4j.Element;
 import org.dom4j.Node;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.XMLWriter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
@@ -33,7 +31,7 @@ import com.sun.jersey.client.apache.config.DefaultApacheHttpClientConfig;
  */
 public final class JasperserverRestClient {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(JasperserverRestClient.class);
+	//private static final Logger LOGGER = LoggerFactory.getLogger(JasperserverRestClient.class);
 
 	private static JasperserverRestClient instance;
 	private ClientConfig clientConfig;
@@ -82,7 +80,7 @@ public final class JasperserverRestClient {
 	 * @throws Exception
 	 */
 	public File getReportAsFile(Report reporte) throws Exception {
-		LOGGER.debug("getReportAsFile");
+	 
 
 		// "automagically" manages cookies
 		ApacheHttpClient client = ApacheHttpClient.create(clientConfig);
@@ -99,7 +97,7 @@ public final class JasperserverRestClient {
 		// ////////////////////////////////////////////////////////////////////////////////
 		// Obtener recurso
 		// ////////////////////////////////////////////////////////////////////////////////
-		LOGGER.debug("Obtener Recurso...");
+		 
 		WebResource resource = null;
 		String resourceResponse = null;
 
@@ -116,30 +114,31 @@ public final class JasperserverRestClient {
 		// ////////////////////////////////////////////////////////////////////////////////
 		// Generar Reporte
 		// ////////////////////////////////////////////////////////////////////////////////
-		LOGGER.debug("Generar Reporte...");
+ 
 		resourceXML = addParametersToResource(resourceXML, reporte);
+ 
 		resource = client.resource(restEndpointUrl + generateReportPath);
 		resource.accept(MediaType.TEXT_XML);
 		String reportResponse = resource.put(String.class, serializetoXML(resourceXML));
+		System.err.println(serializetoXML(resourceXML).toString());
 		
-		System.err.println(restEndpointUrl + generateReportPath);
 		// ////////////////////////////////////////////////////////////////////////////////
 		// Descargar Reporte
 		// ////////////////////////////////////////////////////////////////////////////////
-		LOGGER.debug("Obtener archivo...");
+		 
 		String urlReport = parseReport(reportResponse);
 		resource = client.resource(urlReport);
-		System.out.println(urlReport);
+		System.out.println(restEndpointUrl + generateReportPath);
 		File destFile = null;
 		try {
-			LOGGER.debug("Inicia escritura de archivo...");
+	 
 			File remoteFile = resource.get(File.class);
 			File parentDir = new File(reporte.getOutputFolder());
 			destFile = File.createTempFile("report_", "." + getExtension(reporte.getFormat()), parentDir);
 			// LOGGER.debug("remoteFile:" + remoteFile.getAbsolutePath());
-			LOGGER.debug("destFile:" + destFile.getAbsolutePath());
+			System.out.println("file exported to"+destFile.getAbsolutePath());
 			FileUtils.copyFile(remoteFile, destFile);
-			LOGGER.debug("Finaliza escritura de archivo...");
+	 
 		} catch (IOException e) {
 			throw e;
 		}
@@ -166,7 +165,7 @@ public final class JasperserverRestClient {
 	 * 
 	 */
 	private String parseReport(String reportResponse) throws Exception {
-		LOGGER.debug("reportResponse:\n" + reportResponse);
+ 
 		String urlReport = null;
 		try {
 			Document document = DocumentHelper.parseText(reportResponse);
@@ -239,7 +238,7 @@ public final class JasperserverRestClient {
 			ext = "pdf";
 		} else if (format.equals(Report.FORMAT_EXCEL)) {
 			ext = "xls";
-		}
+		} 
 		return ext;
 	}
 
